@@ -17,7 +17,7 @@ namespace PLFApp.Server.WebApi.Middleware
 
         public async Task Invoke(HttpContext httpContext)
         {
-
+         
             await next.Invoke(httpContext);
         }
 
