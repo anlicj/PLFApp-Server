@@ -11,6 +11,7 @@ namespace PLFApp.Server.EntityFrameworkCore
 
         public virtual DbSet<Member> Member { get; set; }
         public virtual DbSet<Goods> Goods { get; set; }
+        public virtual DbSet<GoodsCategory> GoodsCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +28,7 @@ namespace PLFApp.Server.EntityFrameworkCore
             }
             modelBuilder.ApplyConfiguration(new MemberConfig());
             modelBuilder.ApplyConfiguration(new GoodsConfig());
+            modelBuilder.ApplyConfiguration(new GoodsCategoryConfig());
             base.OnModelCreating(modelBuilder);
         }
     }

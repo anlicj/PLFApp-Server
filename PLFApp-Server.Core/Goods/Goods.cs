@@ -10,6 +10,9 @@ namespace PLFApp.Server.Core
     public class Goods:BaseFullEntity
     {
         [Required]
+        public int GoodsCategoryId { get; set; }
+
+        [Required]
         [MaxLength(30)]
         public string GoodsName { get; set; }
 
@@ -28,5 +31,7 @@ namespace PLFApp.Server.Core
 
         [NotMapped]
         public GoodsStateEnum GoodsStateEnum { get => (GoodsStateEnum)_goodsstate; }
+
+        public virtual GoodsCategory GoodsCategory { get; set; }
     }
 }

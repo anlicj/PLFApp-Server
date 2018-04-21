@@ -12,6 +12,7 @@ namespace PLFApp.Server.Core
         {
             builder.HasIndex("GoodsName");
             builder.HasIndex("GoodsState");
+            builder.HasOne(m => m.GoodsCategory).WithMany(m => m.Goodses).IsRequired().HasForeignKey(m=>m.GoodsCategoryId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

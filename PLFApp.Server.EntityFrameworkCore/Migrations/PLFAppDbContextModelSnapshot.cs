@@ -27,6 +27,8 @@ namespace PLFApp.Server.EntityFrameworkCore.Migrations
 
                     b.Property<DateTime>("CreateDateTime");
 
+                    b.Property<int>("GoodsCategoryId");
+
                     b.Property<string>("GoodsName")
                         .IsRequired()
                         .HasMaxLength(30);
@@ -45,11 +47,35 @@ namespace PLFApp.Server.EntityFrameworkCore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GoodsCategoryId");
+
                     b.HasIndex("GoodsName");
 
                     b.HasIndex("GoodsState");
 
                     b.ToTable("t_Goods");
+                });
+
+            modelBuilder.Entity("PLFApp.Server.Core.GoodsCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CategoryImageSrc")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("GoodsCategoryName")
+                        .IsRequired()
+                        .HasMaxLength(10);
+
+                    b.Property<bool>("IsShowOnHomePage");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsShowOnHomePage");
+
+                    b.ToTable("t_GoodsCategory");
                 });
 
             modelBuilder.Entity("PLFApp.Server.Core.Member", b =>
@@ -87,6 +113,14 @@ namespace PLFApp.Server.EntityFrameworkCore.Migrations
                     b.HasIndex("MobilePhone");
 
                     b.ToTable("t_Member");
+                });
+
+            modelBuilder.Entity("PLFApp.Server.Core.Goods", b =>
+                {
+                    b.HasOne("PLFApp.Server.Core.GoodsCategory", "GoodsCategory")
+                        .WithMany("Goodses")
+                        .HasForeignKey("GoodsCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

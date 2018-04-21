@@ -1,6 +1,6 @@
 ﻿using PLFApp.Server.Core;
 
-namespace PLFApp.Server.BaseEntity
+namespace PLFApp.Server
 {
     public class BaseEntity:BaseEntity<int>
     {

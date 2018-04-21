@@ -6,6 +6,10 @@
 
   <ItemGroup>
     <Compile Remove="Migrations\20180419064453_Change-Goods_Index.cs" />
+    <Compile Remove="Migrations\20180421031401_Add-GoodsCategory.cs" />
+    <Compile Remove="Migrations\20180421031724_Add-GoodsCategory.cs" />
+    <Compile Remove="Migrations\20180421032003_Add-GoodsCategory.cs" />
+    <Compile Remove="Migrations\20180421033041_Add-GoodsCategory.cs" />
   </ItemGroup>
 
   <ItemGroup>

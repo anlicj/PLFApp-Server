@@ -91,34 +91,40 @@ namespace PLFApp.Service
             return changeRows > 0;
         }
 
-        public virtual IQueryable<TEntity> FindList(Expression<Func<TEntity, bool>> whereLambda)
+        public virtual bool EditFields(TEntity entity, List<string> fields)
         {
-            return repository.FindList(whereLambda);
+            repository.EditFields(entity, fields);
+            return repository.SaveChanges() > 0;
         }
 
-        public virtual IQueryable<TEntity> FindList<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
+        public virtual IQueryable<TEntity> FindList(Expression<Func<TEntity, bool>> whereLambda, bool excludeSoftDelete = true)
         {
-            return repository.FindList(whereLambda,sortLambda,isAsc);
+            return repository.FindList(whereLambda, excludeSoftDelete);
         }
 
-        public virtual Task<List<TEntity>> FindListAsync(Expression<Func<TEntity, bool>> whereLambda)
+        public virtual IQueryable<TEntity> FindList<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
         {
-            return repository.FindListAsync(whereLambda);
+            return repository.FindList(whereLambda,sortLambda,isAsc, excludeSoftDelete);
         }
 
-        public virtual Task<List<TEntity>> FindListAsync<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
+        public virtual Task<List<TEntity>> FindListAsync(Expression<Func<TEntity, bool>> whereLambda, bool excludeSoftDelete = true)
         {
-            return repository.FindListAsync(whereLambda,sortLambda,isAsc);
+            return repository.FindListAsync(whereLambda, excludeSoftDelete);
         }
 
-        public virtual IQueryable<TEntity> FindPageList<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
+        public virtual Task<List<TEntity>> FindListAsync<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
         {
-            return repository.FindPageList(pageIndex,pageSize,out totalRecord,whereLambda, sortLambda, isAsc);
+            return repository.FindListAsync(whereLambda,sortLambda,isAsc, excludeSoftDelete);
         }
 
-        public virtual Task<List<TEntity>> FindPageListAsync<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
+        public virtual IQueryable<TEntity> FindPageList<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
         {
-            return repository.FindPageListAsync(pageIndex, pageSize, out totalRecord, whereLambda, sortLambda, isAsc);
+            return repository.FindPageList(pageIndex,pageSize,out totalRecord,whereLambda, sortLambda, isAsc, excludeSoftDelete);
+        }
+
+        public virtual Task<List<TEntity>> FindPageListAsync<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
+        {
+            return repository.FindPageListAsync(pageIndex, pageSize, out totalRecord, whereLambda, sortLambda, isAsc, excludeSoftDelete);
         }
     }
 }

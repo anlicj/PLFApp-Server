@@ -30,7 +30,17 @@ namespace PLFApp.Server.EntityFrameworkCore
 
         public bool Delete(TEntity entity)
         {
-            context.Entry<TEntity>(entity).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+            if ((typeof(ISoftDelete)).IsAssignableFrom(typeof(TEntity)))
+            {
+                //var parameter = Expression.Parameter(typeof(ISoftDelete), "m");
+                //var body = Expression.Equal(Expression.Property(parameter, "IsDelete"), Expression.Constant(true));
+                //var whereLambda = Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+                return EditFields(entity, new List<string>() { "IsDelete" });
+            }
+            else
+            {
+                context.Entry<TEntity>(entity).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+            }
             return true;
         }
 
@@ -66,13 +76,39 @@ namespace PLFApp.Server.EntityFrameworkCore
             return true;
         }
 
-        public IQueryable<TEntity> FindList(Expression<Func<TEntity, bool>> whereLambda)
+        public bool EditFields(TEntity entity, List<string> fields)
         {
-            return context.Set<TEntity>().Where(whereLambda);
+            if (entity == null || fields == null)
+            {
+                return false;
+            }
+            context.Set<TEntity>().Attach(entity);
+            foreach (var field in fields)
+            {
+                context.Entry(entity).Property(field).IsModified = true;
+            }
+            return true;
         }
 
-        public IQueryable<TEntity> FindList<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
+        public IQueryable<TEntity> FindList(Expression<Func<TEntity, bool>> whereLambda, bool excludeSoftDelete)
         {
+            if (excludeSoftDelete)
+            {
+                whereLambda = GetSoftDeleteExpression(whereLambda.Parameters[0].Name).And(whereLambda);
+                return context.Set<TEntity>().Where(whereLambda);
+            }
+            else
+            {
+                return context.Set<TEntity>().Where(whereLambda);
+            }
+        }
+
+        public IQueryable<TEntity> FindList<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete)
+        {
+            if (excludeSoftDelete)
+            {
+                whereLambda = GetSoftDeleteExpression(whereLambda.Parameters[0].Name).And(whereLambda);
+            }
             var list = context.Set<TEntity>().Where(whereLambda);
             if (isAsc)
             {
@@ -84,11 +120,25 @@ namespace PLFApp.Server.EntityFrameworkCore
             }
             return list;
         }
-
-        public IQueryable<TEntity> FindPageList<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
+        
+        public Task<List<TEntity>> FindListAsync(Expression<Func<TEntity, bool>> whereLambda, bool excludeSoftDelete)
         {
+            return FindList(whereLambda, excludeSoftDelete).ToListAsync();
+        }        
+
+        public Task<List<TEntity>> FindListAsync<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
+        {
+            return FindList(whereLambda, sortLambda, isAsc, excludeSoftDelete).ToListAsync();
+        }
+
+        public IQueryable<TEntity> FindPageList<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
+        {
+            if (excludeSoftDelete)
+            {
+                whereLambda = GetSoftDeleteExpression(whereLambda.Parameters[0].Name).And(whereLambda);
+            }
             var list = context.Set<TEntity>().Where(whereLambda);
-            totalRecord = list.Count();            
+            totalRecord = list.Count();
             if (isAsc)
             {
                 list = list.OrderBy(sortLambda);
@@ -100,6 +150,12 @@ namespace PLFApp.Server.EntityFrameworkCore
             return list.Skip((pageIndex - 1) * pageSize).Take(pageSize);
         }
 
+        public Task<List<TEntity>> FindPageListAsync<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc, bool excludeSoftDelete = true)
+        {
+            var list = FindPageList(pageIndex, pageSize, out totalRecord, whereLambda, sortLambda, isAsc,excludeSoftDelete);
+            return list.ToListAsync();
+        }
+        
         public int SaveChanges()
         {
             return context.SaveChanges();
@@ -110,20 +166,16 @@ namespace PLFApp.Server.EntityFrameworkCore
             return context.SaveChangesAsync();
         }
 
-        public Task<List<TEntity>> FindListAsync(Expression<Func<TEntity, bool>> whereLambda)
+        protected Expression<Func<TEntity, bool>> GetSoftDeleteExpression(string parameterName = "m")
         {
-            return FindList(whereLambda).ToListAsync();
-        }
-
-        public Task<List<TEntity>> FindListAsync<TField>(Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
-        {
-            return FindList(whereLambda, sortLambda, isAsc).ToListAsync();
-        }
-
-        public Task<List<TEntity>> FindPageListAsync<TField>(int pageIndex, int pageSize, out int totalRecord, Expression<Func<TEntity, bool>> whereLambda, Expression<Func<TEntity, TField>> sortLambda, bool isAsc)
-        {
-            var list = FindPageList(pageIndex, pageSize, out totalRecord, whereLambda, sortLambda, isAsc);
-            return list.ToListAsync();
+            if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            {
+                var parameter = Expression.Parameter(typeof(ISoftDelete), parameterName);
+                var body = Expression.Equal(Expression.Property(parameter, "IsDelete"), Expression.Constant(true));
+                return Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+            }
+            Expression<Func<TEntity, bool>> result = m => true;
+            return result;
         }
     }
 }

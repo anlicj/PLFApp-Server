@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PLFApp.Server.EntityFrameworkCore;
+using PLFApp.Server.WebApi.Middleware;
 
 namespace PLFApp.Server.WebApi
 {
@@ -25,7 +26,8 @@ namespace PLFApp.Server.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<PLFAppDbContext>(options => {
+            services.AddDbContext<PLFAppDbContext>(options =>
+            {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.InitializeDI();
@@ -39,6 +41,15 @@ namespace PLFApp.Server.WebApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            app.UseStaticFiles();
+            var AllowOriginSites = Configuration["AllowOriginSiteNames"];
+            if (!string.IsNullOrWhiteSpace(AllowOriginSites))
+            {
+                app.UseCrossSiteAccess(new CrossSiteAccessOptions()
+                {
+                    AllowOriginSites = AllowOriginSites.Split(',')
+                });
             }
             app.UseMvc();
         }
