@@ -21,6 +21,7 @@ namespace PLFApp.Server.WebApi.Middleware
             if (options.Value.AllowOriginSites != null && options.Value.AllowOriginSites.Length > 0)
             {
                 context.Response.Headers.Add("Access-Control-Allow-Origin", string.Join(',', options.Value.AllowOriginSites));
+                context.Response.Headers.Add("Access-Control-Allow-Methods","*");
             }
             await next.Invoke(context);
         }

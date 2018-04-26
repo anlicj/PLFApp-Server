@@ -126,5 +126,18 @@ namespace PLFApp.Service
         {
             return repository.FindPageListAsync(pageIndex, pageSize, out totalRecord, whereLambda, sortLambda, isAsc, excludeSoftDelete);
         }
+
+        public TEntity GetEntity(Expression<Func<TEntity, bool>> whereLambda)
+        {
+            return repository.GetEntity(whereLambda);
+        }
+
+        public Task<TEntity> GetEntityAsync(Expression<Func<TEntity, bool>> whereLambda)
+        {
+            return Task<TEntity>.Run(() =>
+            {
+                return GetEntity(whereLambda);
+            });
+        }
     }
 }

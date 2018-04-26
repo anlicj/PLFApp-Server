@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PLFApp.Service;
@@ -10,6 +11,7 @@ namespace PLFApp.Server.WebApi.Controllers
 {
     [Produces("application/json")]
     [Route("api/Goods")]
+    [Authorize]
     public class GoodsController : Controller
     {
         private readonly IGoodsService goodsService;
@@ -20,7 +22,7 @@ namespace PLFApp.Server.WebApi.Controllers
         // GET: api/Goods
         [HttpGet]
         public IEnumerable<string> Get()
-        {            
+        {
             return new string[] { "value1", "value2" };
         }
 

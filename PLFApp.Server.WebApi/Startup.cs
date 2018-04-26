@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using PLFApp.Server.EntityFrameworkCore;
 using PLFApp.Server.WebApi.Middleware;
+using System.Text;
 
 namespace PLFApp.Server.WebApi
 {
@@ -32,7 +30,25 @@ namespace PLFApp.Server.WebApi
             });
             services.InitializeDI();
             services.AddMvc();
-
+            services.AddAuthentication((options) =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters() {
+                    NameClaimType = JwtClaimTypes.Name,
+                    RoleClaimType = JwtClaimTypes.Role,
+                    ValidIssuer = Configuration.GetSection("JWTBearer").GetValue<string>("Issuer"),
+                    ValidAudience = "api",
+                    ValidateIssuer = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("JWTBearer").GetValue<string>("ClientSeret")))
+                };
+                options.RequireHttpsMetadata = false;
+                //options.Audience = "api";//api范围 
+                //options.Authority = Configuration["IdentityServer-Authority"];//IdentityServer地址  
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +67,7 @@ namespace PLFApp.Server.WebApi
                     AllowOriginSites = AllowOriginSites.Split(',')
                 });
             }
+            app.UseAuthentication();
             app.UseMvc();
         }
     }

@@ -24,6 +24,9 @@ namespace PLFApp.Service
         bool DeleteRange(IEnumerable<TEntity> entities);
         Task<bool> DeleteRangeAsync(IEnumerable<TEntity> entities);
 
+        TEntity GetEntity(Expression<Func<TEntity, bool>> whereLambda);
+        Task<TEntity> GetEntityAsync(Expression<Func<TEntity, bool>> whereLambda);
+
         /// <summary>
         /// 查找数据集
         /// </summary>
